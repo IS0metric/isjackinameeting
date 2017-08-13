@@ -2,7 +2,6 @@
 from flask import Flask
 app = Flask(__name__)
 
-from __future__ import print_function
 import httplib2
 import os
 
@@ -51,7 +50,6 @@ def get_credentials():
             credentials = tools.run_flow(flow, store, flags)
         else: # Needed only for compatibility with Python 2.6
             credentials = tools.run(flow, store)
-    print(credentials)
     return credentials
 
 @app.route('/')
@@ -61,7 +59,6 @@ def home():
     service = discovery.build('calendar', 'v3', http=http)
 
     now = datetime.datetime.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time
-    print('Getting the upcoming 10 events')
     eventsResult = service.events().list(
         calendarId='primary', timeMin=now, maxResults=10, singleEvents=True,
         orderBy='startTime').execute()
