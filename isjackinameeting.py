@@ -43,6 +43,8 @@ def home():
                 if now > start and now < end:
                     context["mainString"] = "YES"
                     context["subString"] = "You could try and get in touch and he will get back to you. See contact links below."
+                    if (end-now).minutes < 15:
+                        context["subString"] = "But it's nearly over! You could try and get in touch and he will get back to you. See contact links below."
                     break
     return render_template('home.html', context=context)
 
