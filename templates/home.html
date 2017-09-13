@@ -1,7 +1,11 @@
 <html>
 <head>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+  <title>Is Jack in a Meeting?</title>
+  <link rel="icon" href="static/favicon-calendar.ico">
   <style>
     body {
+      position: relative;
       text-align: center;
       font-family: "Arial", Georgia, Serif;
     }
@@ -12,10 +16,42 @@
     h5 {
       font-size: 18px;
     }
+    .footer {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      padding: 1rem;
+      text-align: center;
+    }
+    html {
+      height: 100%;
+      box-sizing: border-box;
+    }
+
+    *,
+    *:before,
+    *:after {
+      box-sizing: inherit;
+    }
+    a {
+      text-decoration: none;
+      color: #a9a9a9;
+      padding-left: 2px;
+      padding-right: 2px;
+    }
   </style>
 </head>
 <body>
   <h1>{{context.mainString}}</h1>
   <h5><i>{{context.subString}}</i></h5>
+  <div class="footer">
+    <a href="http://www.jack-parkinson.com"><i class="fa fa-empire fa-3x"></i></a>
+    <a href="http://www.facebook.com/JackyParky"><i class="fa fa-facebook fa-3x"></i></a>
+    <a href="http://twitter.com/ISO_metric"><i class="fa fa-twitter fa-3x"></i></a>
+    <a href="https://github.com/IS0metric"><i class="fa fa-github fa-3x"></i></a>
+    <a href="https://www.linkedin.com/in/jack-parkinson-aa0746111/"><i class="fa fa-linkedin fa-3x"></i></a>
+    <a href="mailto:parkinsonj94@gmail.com"><i class="fa fa-envelope fa-3x"></i></a>
+  </div>
 </body>
 </html>

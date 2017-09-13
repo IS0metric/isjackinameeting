@@ -16,7 +16,7 @@ __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file
 def getCalendar():
     with open(os.path.join(__location__, 'secret.json')) as data_file:
         data = json.load(data_file)
-    response = urllib.request.urlopen(data["cal_url"])
+    response = urllib.request.urlopen(data["cal_url"]) # CHANGE FOR URLLIB
     calendar = response.read()
     return Calendar.from_ical(calendar)
 
@@ -47,5 +47,4 @@ def home():
     return render_template('home.html', context=context)
 
 if __name__ == "__main__":
-    CALENDAR = getCalendar()
-    app.run(debug=True)
+    app.run()
