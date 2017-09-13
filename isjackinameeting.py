@@ -1,77 +1,47 @@
 # Flask app
 from __future__ import print_function
-from flask import Flask
+from flask import Flask, render_template
 app = Flask(__name__)
 
-
-import httplib2
-import os
-
-from apiclient import discovery
-from oauth2client import client
-from oauth2client import tools
-from oauth2client.file import Storage
-
 import datetime
-
-try:
-    import argparse
-    flags = argparse.ArgumentParser(parents=[tools.argparser]).parse_args()
-except ImportError:
-    flags = None
-
-# If modifying these scopes, delete your previously saved credentials
-# at ~/.credentials/calendar-python-quickstart.json
-SCOPES = 'https://www.googleapis.com/auth/calendar.readonly'
-CLIENT_SECRET_FILE = 'client_secret.json'
-APPLICATION_NAME = 'Google Calendar API Python Quickstart'
+import urllib2
+import json
+from icalendar import Calendar
 
 
-def get_credentials():
-    """Gets valid user credentials from storage.
-
-    If nothing has been stored, or if the stored credentials are invalid,
-    the OAuth2 flow is completed to obtain the new credentials.
-
-    Returns:
-        Credentials, the obtained credential.
-    """
-    home_dir = os.path.expanduser('~')
-    credential_dir = os.path.join(home_dir, '.credentials')
-    if not os.path.exists(credential_dir):
-        os.makedirs(credential_dir)
-    credential_path = os.path.join(credential_dir,
-                                   'calendar-python-quickstart.json')
-
-    store = Storage(credential_path)
-    credentials = store.get()
-    if not credentials or credentials.invalid:
-        flow = client.flow_from_clientsecrets(CLIENT_SECRET_FILE, SCOPES)
-        flow.user_agent = APPLICATION_NAME
-        if flags:
-            credentials = tools.run_flow(flow, store, flags)
-        else: # Needed only for compatibility with Python 2.6
-            credentials = tools.run(flow, store)
-    print(credentials)
-    return credentials
+def getCalendar():
+    with open('secret.json') as data_file:
+        data = json.load(data_file)
+    response = urllib2.urlopen(data["cal_url"])
+    calendar = response.read()
+    return Calendar.from_ical(calendar)
 
 @app.route('/')
 def home():
-    credentials = get_credentials()
-    http = credentials.authorize(httplib2.Http())
-    service = discovery.build('calendar', 'v3', http=http)
+    calendar = getCalendar()
+    now = datetime.datetime.now()
+    nighttime = now.replace(hour=23, minute=0, second=0, microsecond=0)
+    morningtime = now.replace(hour=7, minute=0, second=0, microsecond=0)
 
-    now = datetime.datetime.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time
-    print('Getting the upcoming 10 events')
-    eventsResult = service.events().list(
-        calendarId='primary', timeMin=now, maxResults=10, singleEvents=True,
-        orderBy='startTime').execute()
-    events = eventsResult.get('items', [])
-    eventsResult = service.events().list(
-        calendarId='ufao3v0p9fuhvn23qgf95qrvj0@group.calendar.google.com', timeMin=now, maxResults=10, singleEvents=True,
-        orderBy='startTime').execute()
-    events += eventsResult.get('items', [])
+    context = {
+        "mainString": "NO",
+        "subString": "He's free right now. You can get in touch."
+    }
 
-    for event in events:
-        start = event['start'].get('dateTime', event['start'].get('date'))
-    return events
+    if now > nighttime and now < morningtime:
+        context["mainString"] = "NO..."
+        context["subString"] = "...but it IS his night time, so he might not be awake."
+    else:
+        for component in calendar.walk():
+            if component.name == "VEVENT":
+                start = component.get("dtstart").dt.replace(tzinfo=None)
+                end = component.get("dtend").dt.replace(tzinfo=None)
+                if now > start and now < end:
+                    context["mainString"] = "YES"
+                    context["subString"] = "You could try and get in touch and he will get back to you. See contact links below."
+                    break
+    return render_template('home.html', context=context)
+
+if __name__ == "__main__":
+    CALENDAR = getCalendar()
+    app.run(debug=True)
