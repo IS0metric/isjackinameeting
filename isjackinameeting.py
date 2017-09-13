@@ -5,14 +5,18 @@ app = Flask(__name__)
 
 import datetime
 import urllib2
+import urllib
 import json
 from icalendar import Calendar
+import os
+
+__location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
 
 def getCalendar():
-    with open('secret.json') as data_file:
+    with open(os.path.join(__location__, 'secret.json')) as data_file:
         data = json.load(data_file)
-    response = urllib2.urlopen(data["cal_url"])
+    response = urllib.request.urlopen(data["cal_url"])
     calendar = response.read()
     return Calendar.from_ical(calendar)
 
