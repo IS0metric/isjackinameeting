@@ -32,7 +32,7 @@ def home():
         "subString": "He's free right now. You can get in touch."
     }
 
-    if now > nighttime and now < morningtime:
+    if now > nighttime or now < morningtime:
         context["mainString"] = "NO..."
         context["subString"] = "...but it IS his night time, so he might not be awake."
     else:
