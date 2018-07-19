@@ -1,5 +1,7 @@
 *.pyc
 *.py~
-secret.json
+secret.py
 isjackinameeting.wsgi
 r.sh
+/meeting-env
+env.ps1
