@@ -3,11 +3,29 @@ from flask import Flask, render_template
 import datetime
 import ssl
 from pyexchange import Exchange2010Service, ExchangeNTLMAuthConnection
+from random import randint
 from secret import SECRET_URL, SECRET_USERNAME, SECRET_PASSWORD
 
 app = Flask(__name__)
 
 
+def random_icon():
+    icons = [
+        "empire",
+        "rebel",
+        "phoenix-squadron",
+        "sith",
+        "trade-federation",
+        "galactic-senate",
+        "mandalorian",
+        "first-order",
+        "first-order-alt",
+        "galactic-republic",
+        "jedi-order",
+        "old-republic"
+    ]
+    x = randint(0, len(icons)-1)
+    return icons[x]
 
 
 def connect(time):
@@ -40,6 +58,7 @@ def home():
         "mainString": "NO",
         "subString": "He's free right now. You can get in touch."
     }
+    context["icon"] = random_icon()
     if now > nighttime or now < morningtime:
         context["mainString"] = "NO"
         context["subString"] = "But it IS his night time, so he might not be awake."
