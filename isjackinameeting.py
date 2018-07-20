@@ -55,23 +55,23 @@ def home():
     morningtime = now.replace(hour=7, minute=0, second=0, microsecond=0)
 
     context = {
-        "mainString": "NO",
+        "mainString": "No",
         "subString": "He's free right now. You can get in touch."
     }
     context["icon"] = random_icon()
     if now > nighttime or now < morningtime:
-        context["mainString"] = "NO"
+        context["mainString"] = "No"
         context["subString"] = "But it IS his night time, so he might not be awake."
     elif now.weekday() > 4:
-        context["mainString"] = "NO"
+        context["mainString"] = "No"
         context["subString"] = "But it's a weekend, so he might not be available."
     else:
         busy = connect(now)
         if busy == "yes":
-            context["mainString"] = "YES"
+            context["mainString"] = "Yes"
             context["subString"] = "But if you drop him an email, he'll get back to you as soon as he can."
         elif busy == "oof":
-            context["mainString"] = "NO"
+            context["mainString"] = "No"
             context["subString"] = "But he's out of office, so might not be available"
     return render_template('home.html', context=context)
 
