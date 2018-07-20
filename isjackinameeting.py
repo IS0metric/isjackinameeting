@@ -1,6 +1,7 @@
 # Flask app
 from flask import Flask, render_template
 import datetime
+import ssl
 from pyexchange import Exchange2010Service, ExchangeNTLMAuthConnection
 from secret import SECRET_URL, SECRET_USERNAME, SECRET_PASSWORD
 
@@ -17,7 +18,7 @@ def connect(time):
     my_calendar = service.calendar()
     events = my_calendar.list_events(
         start=datetime.datetime(time.date().year, time.date().month, time.date().day, time.time().hour, time.time().minute, 0),
-        end=datetime.datetime(time.date().year, time.date().month, time.date().day, time.time().hour, time.time().minute, 0),
+        end=datetime.datetime(time.date().year, time.date().month, time.date().day, time.time().hour, time.time().minute+1, 0)
     )
     if events.events == []:
         return "no"
