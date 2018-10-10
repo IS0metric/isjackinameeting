@@ -27,13 +27,16 @@ def random_icon():
     x = randint(0, len(icons)-1)
     return icons[x]
 
-
+"""
+As of 10/10/18, mailbox connection is not working. Will revisit
+"""
 def connect(time):
     connection = ExchangeNTLMAuthConnection(url=SECRET_URL,
                                             username=SECRET_USERNAME,
                                             password=SECRET_PASSWORD)
     service = Exchange2010Service(connection)
     my_calendar = service.calendar()
+    print(my_calendar)
     events = my_calendar.list_events(
         start=datetime.datetime(time.date().year, time.date().month, time.date().day, time.time().hour, time.time().minute, 0),
         end=datetime.datetime(time.date().year, time.date().month, time.date().day, time.time().hour, time.time().minute+1, 0)
@@ -46,6 +49,22 @@ def connect(time):
         if event.subject.lower() == "out of office":
             return "ooF"
     return "yes"
+
+
+def quickfix(time):
+    if time.isoweekday() in range(1,5) and time.hour in range(10,11) and time.minute <= 30:
+        return "yes"
+    if time.isoweekday() == 1 and time.hour in range(13,14):
+        return "yes"
+    if time.isoweekday() == 2 and time.hour in range(11, 13):
+        return "yes"
+    if time.isoweekday() == 3 and time.hour in range(16, 17):
+        return "yes"
+    if time.isoweekday() == 4 and time.hour in range(12, 14):
+        return "yes"
+    if time.isoweekday() == 5:
+        return "oof"
+    return "no"
 
 
 @app.route('/')
@@ -66,7 +85,8 @@ def home():
         context["mainString"] = "No"
         context["subString"] = "But it's a weekend, so he might not be available."
     else:
-        busy = connect(now)
+        #busy = connect(now)
+        busy = quickfix(now) #dirtyhack
         if busy == "yes":
             context["mainString"] = "Yes"
             context["subString"] = "But if you drop him an email, he'll get back to you as soon as he can."
