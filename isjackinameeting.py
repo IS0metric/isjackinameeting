@@ -1,5 +1,5 @@
 # Flask app
-from flask import Flask, render_template
+from flask import Flask, render_template, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 import datetime
 import ssl
@@ -72,12 +72,38 @@ _responses_ = {
     "day_off": {"mainString": "No","subString": "But it's his day off so he might not be reachable"},
 }
 
-# PROCESS:
-#  check if weekend
-#  check if day_off
-#  check if evening_time, night_time, then morning_time
-#  check if busy (database)
-#  must be free
+
+@app.route('/api/hello', methods=['GET'])
+def hello():
+    return jsonify({'message' : 'Hello, World!'})
+
+
+@app.route('/api/get_current', methods=['GET'])
+def api_get_current():
+    status = check_db()
+    return jsonify({'status' : status})
+
+
+@app.route('/api/switch/<string:passw>', methods=['GET'])
+def api_switch(passw):
+    # should probbaly fix this...
+    if passw != secret.API_PASS:
+        return jsonify({'message' : 'no auth'})
+    status = switch_status()
+    return jsonify({'message' : 'success', 'status': status})
+
+
+def switch_status():
+    meeting = CheckIn.query.filter_by(name="main").first()
+    meeting.inmeeting = 1 - meeting.inmeeting
+    db.session.commit()
+    return meeting.result()
+
+
+def check_db():
+    meeting = CheckIn.query.filter_by(name="main").first()
+    return meeting.result()
+
 
 @app.route('/')
 def home():
@@ -87,7 +113,7 @@ def home():
         context = _responses_[meeting]
     else:
         meeting = CheckIn.query.filter_by(name="main").first()
-        context = _responses_[meeting.result()]
+        context = _responses_[meeting]
     context["icon"] = random_icon()
     return render_template('home.html', context=context)
 
