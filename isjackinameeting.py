@@ -78,16 +78,16 @@ def hello():
     return jsonify({'message' : 'Hello, World!'})
 
 
-@app.route('/api/get_current', methods=['GET'])
+@app.route('/api/get_status', methods=['GET'])
 def api_get_current():
     status = check_db()
     return jsonify({'status' : status})
 
 
-@app.route('/api/switch/<string:passw>', methods=['GET'])
-def api_switch(passw):
+@app.route('/api/switch/<string:auth>', methods=['GET'])
+def api_switch(auth):
     # should probbaly fix this...
-    if passw != secret.API_PASS:
+    if auth != secret.API_PASS:
         return jsonify({'message' : 'no auth'})
     status = switch_status()
     return jsonify({'message' : 'success', 'status': status})
@@ -116,6 +116,7 @@ def home():
         context = _responses_[meeting]
     context["icon"] = random_icon()
     return render_template('home.html', context=context)
+
 
 if __name__ == "__main__":
     app.run(debug=True)
