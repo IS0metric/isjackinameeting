@@ -8,7 +8,7 @@ import secret
 
 app = Flask(__name__)
 
-db_string = 'mysql://' + secret.DB_USERNAME + ':' + secret.DB_PASSWORD + '@' + secret.DB_HOST + '/' + secret.DB_NAME
+db_string = 'mysql+pymysql://' + secret.DB_USERNAME + ':' + secret.DB_PASSWORD + '@' + secret.DB_HOST + '/' + secret.DB_NAME
 app.config['SQLALCHEMY_DATABASE_URI'] = db_string
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 app.config['APPLICAITON_ROOT'] = '/'
