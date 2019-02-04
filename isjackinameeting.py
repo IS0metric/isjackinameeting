@@ -100,7 +100,7 @@ def switch_status():
     return meeting.result()
 
 
-def check_db():
+def check_status():
     meeting = CheckIn.query.filter_by(name="main").first()
     return meeting.result()
 
@@ -112,7 +112,7 @@ def home():
     if meeting:
         context = _responses_[meeting]
     else:
-        meeting = CheckIn.query.filter_by(name="main").first()
+        meeting = check_status()
         context = _responses_[meeting]
     context["icon"] = random_icon()
     return render_template('home.html', context=context)
