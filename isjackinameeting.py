@@ -80,7 +80,7 @@ def hello():
 
 @app.route('/api/get_status', methods=['GET'])
 def api_get_current():
-    status = check_db()
+    status = check_status()
     return jsonify({'status' : status})
 
 
