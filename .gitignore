@@ -5,3 +5,4 @@ isjackinameeting.wsgi
 r.sh
 /meeting-env
 env.ps1
+/venv
