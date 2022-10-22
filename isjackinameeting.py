@@ -85,7 +85,7 @@ def api_get_current():
 
 
 @app.route('/api/switch', methods=['GET'])
-def api_switch(auth):
+def api_switch():
     # should probbaly fix this...
     auth = request.args.get("auth")
     status = request.args.get("status")
