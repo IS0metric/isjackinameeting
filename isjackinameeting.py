@@ -23,10 +23,12 @@ class CheckIn(db.Model):
     inmeeting = db.Column(db.Integer)
 
     def result(self):
-        if self.inmeeting == 1:
-            return "busy"
+        if self.inmeeting == 0:
+            return "free_office"
+        elif self.inmeeting == 2:
+            return "free_home"
         else:
-            return "free"
+            return "busy"
 
 
 def random_icon():
@@ -51,8 +53,6 @@ def random_icon():
 def main_times(time):
     if time.isoweekday() in range(6,8):
         return "weekend"
-    if time.isoweekday() == 5:
-        return "day_off"
     if time.hour >= 17 and time.hour < 22:
         return "evening"
     if time.hour >= 22 and time.hour < 5:
@@ -64,12 +64,12 @@ def main_times(time):
 
 _responses_ = {
     "weekend": {"mainString":"No","subString":"But it's a weekend, so he might not be available."},
-    "free":{"mainString": "No","subString": "He's free right now. You can get in touch."},
+    "free_office":{"mainString": "No","subString": "He's in the office right now. You can pop by and see him or give him a call."},
+    "free_home":{"mainString": "No","subString": "But he's not in the office right now. Send him an email."},
     "busy": {"mainString":"Yes","subString":"But if you drop him an email, he'll get back to you as soon as he can."},
     "night": {"mainString": "No","subString": "But it IS his night time, so he might not be awake."},
     "evening": {"mainString": "No","subString": "But it's outside of his usual working hours, so he might not be available"},
     "morning":{"mainString": "No","subString": "But it's early, so he might not be in the office yet."},
-    "day_off": {"mainString": "No","subString": "But it's his day off so he might not be reachable"},
 }
 
 
@@ -84,18 +84,25 @@ def api_get_current():
     return jsonify({'status' : status})
 
 
-@app.route('/api/switch/<string:auth>', methods=['GET'])
+@app.route('/api/switch', methods=['GET'])
 def api_switch(auth):
     # should probbaly fix this...
+    auth = request.args.get("auth")
+    status = request.args.get("status")
     if auth != secret.API_PASS:
         return jsonify({'message' : 'no auth'})
-    status = switch_status()
+    switch_status("status")
     return jsonify({'message' : 'success', 'status': status})
 
 
-def switch_status():
+def switch_status(status):
     meeting = CheckIn.query.filter_by(name="main").first()
-    meeting.inmeeting = 1 - meeting.inmeeting
+    if status=="busy":
+        meeting.inmeeting = 1
+    elif status=="free_home":
+        meeting.inmeeting = 2
+    else:
+        meeting.inmeeting = 0
     db.session.commit()
     return meeting.result()
 
