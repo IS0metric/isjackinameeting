@@ -91,7 +91,7 @@ def api_switch(auth):
     status = request.args.get("status")
     if auth != secret.API_PASS:
         return jsonify({'message' : 'no auth'})
-    switch_status("status")
+    switch_status(status)
     return jsonify({'message' : 'success', 'status': status})
 
 
