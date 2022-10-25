@@ -55,7 +55,7 @@ def main_times(time):
         return "weekend"
     if time.hour >= 17 and time.hour < 22:
         return "evening"
-    if time.hour >= 22 and time.hour < 5:
+    if time.hour >= 22 or time.hour < 5:
         return "night"
     if time.hour >= 5 and time.hour < 9:
         return "morning"
