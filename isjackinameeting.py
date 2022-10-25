@@ -116,13 +116,11 @@ def check_status():
 def home():
     now = datetime.datetime.now()
     meeting = main_times(now)
-    meeting_old = meeting
     if meeting:
         context = _responses_[meeting]
     else:
         meeting = check_status()
         context = _responses_[meeting]
-    context["mainString"] = meeting_old
     context["icon"] = random_icon()
     return render_template('home.html', context=context)
 
