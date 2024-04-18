@@ -1,20 +1,30 @@
 # Flask app
 from flask import Flask, render_template, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 import datetime
 import ssl
 from random import randint
-import secret
+import os
+import db_conf
+import requests
+from pprint import pprint
 
 app = Flask(__name__)
 
-db_string = 'mysql+pymysql://' + secret.DB_USERNAME + ':' + secret.DB_PASSWORD + '@' + secret.DB_HOST + '/' + secret.DB_NAME
-app.config['SQLALCHEMY_DATABASE_URI'] = db_string
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
-app.config['APPLICAITON_ROOT'] = '/'
-app.config['WTF_CSRF_ENABLED'] = True
+if db_conf.DEBUG:
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(db_conf.DB_PATH, 'isjackinameeting.db')
+else:
+    db_string = 'mysql+pymysql://' + db_conf.DB_USERNAME + ':' + db_conf.DB_PASSWORD + '@' + db_conf.DB_HOST + '/' + db_conf.DB_NAME
+    app.config['SQLALCHEMY_DATABASE_URI'] = db_string
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
+    app.config['APPLICAITON_ROOT'] = '/'
+    app.config['WTF_CSRF_ENABLED'] = True
 app.config['SECRET_KEY'] = "secret"
+
 db = SQLAlchemy(app)
+
+migrate = Migrate(app, db)
 
 class CheckIn(db.Model):
     __tablename__ = 'in_table'
@@ -89,7 +99,7 @@ def api_switch():
     # should probbaly fix this...
     auth = request.args.get("auth")
     status = request.args.get("status")
-    if auth != secret.API_PASS:
+    if auth != db_conf.API_PASS:
         return jsonify({'message' : 'no auth'})
     switch_status(status)
     return jsonify({'message' : 'success', 'status': status})
@@ -106,15 +116,48 @@ def switch_status(status):
     db.session.commit()
     return meeting.result()
 
+def get_calendar():
+    start_date_time = datetime.datetime.today()
+    end_date_time = start_date_time + datetime.timedelta(days=7)
+    url = 'https://graph.microsoft.com/v1.0/me/calendar/events?$filter=start/dateTime ge \'{0}\' and end/dateTime le \'{1}\''.format(start_date_time.strftime('%Y-%m-%dT00:00:00Z'), end_date_time.strftime('%Y-%m-%dT00:00:00Z'))
+    headers = {'Authorization': 'Bearer ' + db_conf.ACCESS_TOKEN}
+    response = requests.get(url, headers=headers)
+    events = response.json()['value']
+    return events
+
+def parse_calendar(events):
+    pprint(events)
 
 def check_status():
     meeting = CheckIn.query.filter_by(name="main").first()
     return meeting.result()
 
+def check_if_free(now, calendar):
+    for event in calendar:
+        start = datetime.datetime.strptime(event['start']['dateTime'], '%Y-%m-%dT%H:%M:%S.%f0')
+        end = datetime.datetime.strptime(event['end']['dateTime'], '%Y-%m-%dT%H:%M:%S.%f0')
+        if start < now and end > now:
+            return False
+    return True
+
+def get_event_dates_and_times(events):
+    dates = []
+    for event in events:
+        start = datetime.datetime.strptime(event['start']['dateTime'], '%Y-%m-%dT%H:%M:%S.%f0')
+        end = datetime.datetime.strptime(event['end']['dateTime'], '%Y-%m-%dT%H:%M:%S.%f0')
+        if start.date() == end.date():
+            dates.append((start.date(), start.time(), end.time()))
+        else:
+            dates.append((start.date(), start.time(), datetime.time(23, 59, 59)))
+            dates.append((end.date(), datetime.time(0, 0, 0), end.time()))
+    return dates
 
 @app.route('/')
 def home():
+    calendar = get_calendar()
     now = datetime.datetime.now()
+    free = check_if_free(now, calendar)
+    print(get_event_dates_and_times(calendar))
     meeting = main_times(now)
     if meeting:
         context = _responses_[meeting]

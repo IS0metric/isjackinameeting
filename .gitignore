@@ -7,3 +7,5 @@ r.sh
 env.ps1
 /venv
 .ijiam
+isjackinameeting.db
+/migrations
